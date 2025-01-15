@@ -1,27 +1,25 @@
-import java.util.HashMap;
-
 public class Ingresos {
-    private HashMap<String, Double> ingresos;
-
-    public Ingresos() {
-        ingresos = new HashMap<>();
-    }
+    private double totalIngresos = 0;
 
     public boolean registrarIngreso(String concepto, double cantidad) {
-        if (concepto.equalsIgnoreCase("nomina")) {
-            cantidad -= cantidad * 0.15; // Aplicar IRPF del 15%
+        if (cantidad < 0) {
+            System.out.println("El ingreso no puede ser negativo.");
+            return false;
         }
-        ingresos.put(concepto, ingresos.getOrDefault(concepto, 0.0) + cantidad);
+
+        if (concepto.equals("nomina")) {
+            cantidad *= 0.85;  // Aplicar IRPF (15%)
+        }
+
+        totalIngresos += cantidad;
         return true;
     }
 
-    public void mostrarIngresos() {
-        System.out.println("Ingresos registrados:");
-        ingresos.forEach((concepto, cantidad) ->
-                System.out.println(" - " + concepto + ": " + cantidad));
+    public double getTotalIngresos() {
+        return totalIngresos;
     }
 
-    public double getTotalIngresos() {
-        return ingresos.values().stream().mapToDouble(Double::doubleValue).sum();
+    public void mostrarIngresos() {
+        System.out.println("Ingresos totales: " + totalIngresos);
     }
 }

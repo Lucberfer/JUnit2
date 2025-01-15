@@ -1,28 +1,27 @@
-import java.util.HashMap;
-
 public class Gastos {
-    private HashMap<String, Double> gastos;
+    private double totalGastos = 0;
 
-    public Gastos() {
-        gastos = new HashMap<>();
-    }
-
-    public boolean registrarGasto(String concepto, double cantidad, double totalIngresos) {
-        if (cantidad > totalIngresos) {
-            System.out.println("Error: No puede gastar más de lo que tiene ingresado.");
+    public boolean registrarGasto(String concepto, double cantidad, double saldoDisponible) {
+        if (cantidad < 0) {
+            System.out.println("El gasto no puede ser negativo.");
             return false;
         }
-        gastos.put(concepto, gastos.getOrDefault(concepto, 0.0) + cantidad);
+
+        if (cantidad > saldoDisponible) {
+            System.out.println("No se puede realizar la operación por falta de saldo.");
+            return false;
+        }
+
+        totalGastos += cantidad;
+        System.out.println("Gasto registrado: " + concepto + " por un valor de " + cantidad);
         return true;
     }
 
-    public void mostrarGastos() {
-        System.out.println("Gastos registrados:");
-        gastos.forEach((concepto, cantidad) ->
-                System.out.println(" - " + concepto + ": " + cantidad));
+    public double getTotalGastos() {
+        return totalGastos;
     }
 
-    public double getTotalGastos() {
-        return gastos.values().stream().mapToDouble(Double::doubleValue).sum();
+    public void mostrarGastos() {
+        System.out.println("Gastos totales: " + totalGastos);
     }
 }
