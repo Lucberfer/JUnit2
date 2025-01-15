@@ -112,9 +112,14 @@ public class Main {
                     System.out.println("Opción no válida.");
             }
 
+            // Imprimir el estado actual (ingresos, gastos y saldo total)
             System.out.println("Estado actual:");
             ingresos.mostrarIngresos();
             gastos.mostrarGastos();
+
+            // Mostrar el saldo total (ingresos - gastos)
+            double saldoTotal = ingresos.getTotalIngresos() - gastos.getTotalGastos();
+            System.out.println("Saldo total: " + saldoTotal);
         }
 
         System.out.println("Programa terminado. Saldo final: " +
