@@ -19,6 +19,10 @@ public class Ingresos {
         return totalIngresos;
     }
 
+    public void setTotalIngresos(double totalIngresos) {
+        this.totalIngresos = totalIngresos;
+    }
+
     public void mostrarIngresos() {
         System.out.println("Ingresos totales: " + totalIngresos);
     }

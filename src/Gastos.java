@@ -21,6 +21,10 @@ public class Gastos {
         return totalGastos;
     }
 
+    public void setTotalGastos(double totalGastos) {
+        this.totalGastos = totalGastos;
+    }
+
     public void mostrarGastos() {
         System.out.println("Gastos totales: " + totalGastos);
     }

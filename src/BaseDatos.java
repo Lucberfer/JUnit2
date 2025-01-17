@@ -9,7 +9,6 @@ public class BaseDatos {
 
     public void conectar() {
         try {
-            // Cargar el controlador de SQLite
             Class.forName("org.sqlite.JDBC");
             conexion = DriverManager.getConnection("jdbc:sqlite:usuarios.db");
             System.out.println("Conexión con la base de datos establecida.");
@@ -31,24 +30,40 @@ public class BaseDatos {
         }
     }
 
-    public void crearTablaUsuarios() {
-        String sql = "CREATE TABLE IF NOT EXISTS usuarios (" +
+    public void crearTablas() {
+        String sqlUsuarios = "CREATE TABLE IF NOT EXISTS usuarios (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "dni TEXT NOT NULL UNIQUE)";
-        try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
-            stmt.executeUpdate();
-            System.out.println("Tabla 'usuarios' verificada o creada correctamente.");
+        String sqlIngresos = "CREATE TABLE IF NOT EXISTS ingresos (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "dni TEXT NOT NULL, " +
+                "concepto TEXT NOT NULL, " +
+                "cantidad REAL NOT NULL, " +
+                "FOREIGN KEY (dni) REFERENCES usuarios(dni))";
+        String sqlGastos = "CREATE TABLE IF NOT EXISTS gastos (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "dni TEXT NOT NULL, " +
+                "concepto TEXT NOT NULL, " +
+                "cantidad REAL NOT NULL, " +
+                "FOREIGN KEY (dni) REFERENCES usuarios(dni))";
+
+        try {
+            try (PreparedStatement stmtUsuarios = conexion.prepareStatement(sqlUsuarios)) {
+                stmtUsuarios.executeUpdate();
+            }
+            try (PreparedStatement stmtIngresos = conexion.prepareStatement(sqlIngresos)) {
+                stmtIngresos.executeUpdate();
+            }
+            try (PreparedStatement stmtGastos = conexion.prepareStatement(sqlGastos)) {
+                stmtGastos.executeUpdate();
+            }
+            System.out.println("Tablas verificadas o creadas correctamente.");
         } catch (SQLException e) {
-            System.out.println("Error al crear la tabla 'usuarios': " + e.getMessage());
+            System.out.println("Error al crear las tablas: " + e.getMessage());
         }
     }
 
     public boolean autenticarUsuario(String dni) {
-        if (conexion == null) {
-            System.out.println("La conexión a la base de datos no está inicializada.");
-            return false;
-        }
-
         String sql = "SELECT COUNT(*) FROM usuarios WHERE dni = ?";
         try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
             stmt.setString(1, dni);
@@ -63,11 +78,6 @@ public class BaseDatos {
     }
 
     public boolean registrarUsuario(String dni) {
-        if (conexion == null) {
-            System.out.println("La conexión a la base de datos no está inicializada.");
-            return false;
-        }
-
         String sql = "INSERT INTO usuarios (dni) VALUES (?)";
         try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
             stmt.setString(1, dni);
@@ -77,5 +87,57 @@ public class BaseDatos {
             System.out.println("Error al registrar el usuario: " + e.getMessage());
         }
         return false;
+    }
+
+    public void registrarIngreso(String dni, String concepto, double cantidad) {
+        String sql = "INSERT INTO ingresos (dni, concepto, cantidad) VALUES (?, ?, ?)";
+        try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
+            stmt.setString(1, dni);
+            stmt.setString(2, concepto);
+            stmt.setDouble(3, cantidad);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error al registrar el ingreso: " + e.getMessage());
+        }
+    }
+
+    public void registrarGasto(String dni, String concepto, double cantidad) {
+        String sql = "INSERT INTO gastos (dni, concepto, cantidad) VALUES (?, ?, ?)";
+        try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
+            stmt.setString(1, dni);
+            stmt.setString(2, concepto);
+            stmt.setDouble(3, cantidad);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error al registrar el gasto: " + e.getMessage());
+        }
+    }
+
+    public double cargarIngresos(String dni) {
+        String sql = "SELECT SUM(cantidad) FROM ingresos WHERE dni = ?";
+        try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
+            stmt.setString(1, dni);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al cargar los ingresos: " + e.getMessage());
+        }
+        return 0;
+    }
+
+    public double cargarGastos(String dni) {
+        String sql = "SELECT SUM(cantidad) FROM gastos WHERE dni = ?";
+        try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
+            stmt.setString(1, dni);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al cargar los gastos: " + e.getMessage());
+        }
+        return 0;
     }
 }
